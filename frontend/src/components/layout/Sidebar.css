@@ -1,0 +1,199 @@
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: var(--bg-sidebar);
+  border-right: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: width 0.22s cubic-bezier(0.4,0,0.2,1),
+              min-width 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+
+.sidebar-collapsed {
+  width: 58px;
+  min-width: 58px;
+}
+
+/* ── Brand ── */
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  min-height: 62px;
+  overflow: hidden;
+}
+
+.brand-icon {
+  width: 34px;
+  height: 34px;
+  background: var(--gradient-main);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+.brand-name {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #E2E8F0;
+  line-height: 1.2;
+  white-space: nowrap;
+  letter-spacing: -0.3px;
+}
+.brand-sub {
+  font-size: 9px;
+  color: rgba(240,165,0,0.6);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+/* ── Toggle ── */
+.sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.sidebar-toggle:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--text-subtle);
+  border-color: rgba(255,255,255,0.14);
+}
+
+/* ── Nav ── */
+.sidebar-nav {
+  flex: 1;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: rgba(148,163,184,0.6);
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  position: relative;
+  border-left: 2px solid transparent;
+}
+.nav-item:hover {
+  background: rgba(255,255,255,0.04);
+  color: var(--text-subtle);
+  border-left-color: rgba(240,165,0,0.3);
+}
+.nav-item.active {
+  background: rgba(240,165,0,0.07);
+  color: #F0A500;
+  border-left-color: #F0A500;
+  font-weight: 600;
+}
+.nav-item.active .nav-icon { color: #F0A500; opacity: 1; }
+.nav-icon { flex-shrink: 0; opacity: 0.6; transition: opacity 0.15s; }
+.nav-item:hover .nav-icon { opacity: 0.85; }
+
+.sidebar-collapsed .nav-item {
+  justify-content: center;
+  padding: 8px 0;
+  border-left: none;
+  border-bottom: 2px solid transparent;
+}
+.sidebar-collapsed .nav-item.active {
+  border-bottom-color: #F0A500;
+  border-left-color: transparent;
+}
+
+/* ── Footer ── */
+.sidebar-footer {
+  padding: 10px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.sidebar-collapsed .sidebar-footer {
+  flex-direction: column;
+  gap: 6px;
+}
+
+.user-info { flex: 1; min-width: 0; }
+.user-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  background: rgba(240,165,0,0.15);
+  border: 1px solid rgba(240,165,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 12px;
+  color: #F0A500;
+  flex-shrink: 0;
+}
+.user-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-subtle);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.user-role {
+  font-size: 10px;
+  color: rgba(240,165,0,0.5);
+  text-transform: capitalize;
+  margin-top: 1px;
+  letter-spacing: 0.3px;
+}
+.logout-btn {
+  background: none;
+  border: none;
+  color: rgba(148,163,184,0.4);
+  padding: 5px;
+  border-radius: 5px;
+  display: flex;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.logout-btn:hover { color: var(--accent-red); background: rgba(239,68,68,0.08); }
+
+/* Light mode overrides — sidebar stays dark */
+body[data-theme="light"] .sidebar { background: #060810; border-right-color: rgba(255,255,255,0.07); }
+body[data-theme="light"] .brand-name    { color: #E2E8F0; }
+body[data-theme="light"] .nav-item      { color: rgba(148,163,184,0.6); }
+body[data-theme="light"] .nav-item:hover { background: rgba(255,255,255,0.05); color: #CBD5E1; }
+body[data-theme="light"] .nav-item.active { background: rgba(240,165,0,0.08); color: #F0A500; }
+body[data-theme="light"] .user-name { color: #CBD5E1; }
+body[data-theme="light"] .sidebar-toggle { border-color: rgba(255,255,255,0.1); }
+body[data-theme="light"] .sidebar-toggle:hover { background: rgba(255,255,255,0.07); color: #CBD5E1; }

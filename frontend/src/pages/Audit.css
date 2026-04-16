@@ -1,0 +1,41 @@
+.audit-log-list { display: flex; flex-direction: column; }
+.audit-log-item {
+  display: flex;
+  gap: 14px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s;
+}
+.audit-log-item:last-child { border-bottom: none; }
+.audit-log-item:hover { background: var(--bg-hover); }
+.audit-log-indicator { width: 2px; min-width: 2px; border-radius: 1px; }
+.audit-log-content { flex: 1; }
+.audit-log-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.audit-action { font-size: 13px; font-weight: 700; }
+.audit-entity {
+  font-size: 11px;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.audit-time { font-size: 11.5px; color: var(--text-muted); margin-left: auto; font-variant-numeric: tabular-nums; }
+.audit-log-row2 { display: flex; gap: 10px; align-items: center; margin-top: 3px; flex-wrap: wrap; }
+.audit-user { font-size: 12px; color: var(--text-subtle); }
+.audit-desc { font-size: 12px; color: var(--text-muted); }
+.audit-ip { font-size: 11px; color: var(--text-muted); font-family: monospace; }
+.audit-changes { display: flex; gap: 8px; margin-top: 7px; flex-wrap: wrap; }
+.audit-change {
+  flex: 1;
+  min-width: 180px;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 11px;
+}
+.audit-old { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.14); border-left: 2px solid rgba(239,68,68,0.4); }
+.audit-old span { color: #EF4444; font-weight: 700; font-size: 9.5px; display: block; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+.audit-new { background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.14); border-left: 2px solid rgba(16,185,129,0.4); }
+.audit-new span { color: #10B981; font-weight: 700; font-size: 9.5px; display: block; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+.audit-change code { color: var(--text-subtle); font-family: monospace; font-size: 11px; }

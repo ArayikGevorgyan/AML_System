@@ -1,0 +1,47 @@
+/* ── Alert detail grid (in modal) ── */
+.alert-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.alert-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 10px 12px;
+}
+.alert-detail-item span:first-child {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  font-weight: 700;
+}
+
+.alert-details-box {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border);
+  border-left: 2px solid rgba(240,165,0,0.3);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.alert-detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+.alert-detail-row span:first-child {
+  color: var(--text-muted);
+  text-transform: capitalize;
+}
+.alert-detail-row span:last-child {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
