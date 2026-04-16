@@ -13,9 +13,8 @@
   border-radius: var(--radius-lg);
   padding: 18px 20px;
   display: flex;
-  flex-direction: row-reverse;
-  align-items: flex-start;
-  gap: 12px;
+  flex-direction: column;
+  gap: 14px;
   transition: border-color 0.2s, transform 0.2s;
   position: relative;
   overflow: hidden;
@@ -35,6 +34,12 @@
 }
 .kpi-card:hover::before { opacity: 1; }
 
+.kpi-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .kpi-icon {
   width: 36px;
   height: 36px;
@@ -45,14 +50,17 @@
   flex-shrink: 0;
 }
 
-.kpi-body { flex: 1; min-width: 0; }
+.kpi-body { display: flex; flex-direction: column; }
 .kpi-value {
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 800;
   color: var(--text-primary);
   line-height: 1.1;
   letter-spacing: -0.8px;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .kpi-title {
   font-size: 11px;

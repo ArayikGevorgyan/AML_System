@@ -21,12 +21,14 @@ function KPICard({ title, value, sub, icon: Icon, color, format }) {
     : Number(value).toLocaleString();
   return (
     <div className="kpi-card">
-      <div className="kpi-icon" style={{ background: `${color}20`, color }}>
-        <Icon size={22} />
+      <div className="kpi-card-top">
+        <div className="kpi-title">{title}</div>
+        <div className="kpi-icon" style={{ background: `${color}20`, color }}>
+          <Icon size={20} />
+        </div>
       </div>
       <div className="kpi-body">
         <div className="kpi-value">{formatted}</div>
-        <div className="kpi-title">{title}</div>
         {sub && <div className="kpi-sub">{sub}</div>}
       </div>
     </div>

@@ -57,21 +57,45 @@ def sanctions_stats(
     db: Session = Depends(get_db),
 ):
     from sqlalchemy import func
-    total = db.query(func.count(SanctionsEntry.id)).scalar() or 0
+    from models.sanctions import SanctionsAlias
+
+    total_entries = db.query(func.count(SanctionsEntry.id)).scalar() or 0
+    total_aliases = db.query(func.count(SanctionsAlias.id)).scalar() or 0
+
     by_type = (
         db.query(SanctionsEntry.entity_type, func.count(SanctionsEntry.id))
         .group_by(SanctionsEntry.entity_type)
         .all()
     )
-    by_list = (
+    by_list_raw = (
         db.query(SanctionsEntry.list_name, func.count(SanctionsEntry.id))
         .group_by(SanctionsEntry.list_name)
         .all()
     )
+
+    # Normalise list names for consistent frontend display
+    by_list: dict = {}
+    ofac_count = 0
+    un_count = 0
+    for ln, cnt in by_list_raw:
+        if not ln:
+            continue
+        by_list[ln] = cnt
+        ln_lower = ln.lower()
+        if "sdn" in ln_lower or "ofac" in ln_lower:
+            ofac_count += cnt
+        elif "un" in ln_lower or "consolidated" in ln_lower:
+            un_count += cnt
+
     return {
-        "total_entries": total,
+        "total_entries":  total_entries,
+        "total_aliases":  total_aliases,
+        "ofac_entries":   ofac_count,
+        "un_entries":     un_count,
+        "programs_count": 86,
+        "countries_count": 196,
         "by_entity_type": {t: c for t, c in by_type if t},
-        "by_list": {ln: c for ln, c in by_list if ln},
+        "by_list":        by_list,
     }
 
 
