@@ -17,9 +17,9 @@
 
 ### FR-02: User Registration
 - **FR-02.1** The system shall allow new users to self-register by providing their full name, username, email, password, and role.
-- **FR-02.2** The system shall send a 6-digit verification code to the provided email address before completing registration.
-- **FR-02.3** The system shall validate that the email domain exists (MX record check) and reject invalid email addresses with the message "Email domain does not exist or cannot receive emails."
-- **FR-02.4** Verification codes shall expire after 10 minutes.
+- **FR-02.2** The system shall send a 6-digit verification code to the provided email address (via Brevo SMTP) before completing registration.
+- **FR-02.3** The system shall validate that the email domain exists (MX record check) and reject invalid email addresses.
+- **FR-02.4** Verification codes shall be single-use and expire after 10 minutes.
 - **FR-02.5** The system shall reject duplicate usernames and email addresses.
 
 ### FR-03: Role-Based Access Control (RBAC)
@@ -27,7 +27,7 @@
 - **FR-03.2** Admin users shall have full access to all modules including user management, rule configuration, and audit logs.
 - **FR-03.3** Analyst users shall be able to view and investigate customers, transactions, alerts, and cases.
 - **FR-03.4** Supervisor users shall be able to approve/escalate cases and file SARs.
-- **FR-03.5** The system shall return HTTP 403 Forbidden for unauthorized role access attempts.
+- **FR-03.5** Role-based access shall be enforced server-side on every request; the system shall return HTTP 403 Forbidden for unauthorized access attempts.
 
 ### FR-04: Customer Management
 - **FR-04.1** The system shall allow creation of customer profiles with full name, email, phone, nationality, date of birth, address, risk level, PEP status, and source of funds.
@@ -44,11 +44,12 @@
 - **FR-06.1** The system shall allow creation of financial transactions between accounts with amount, currency, type, and country fields.
 - **FR-06.2** Every transaction shall automatically trigger the AML Rules Engine upon submission.
 - **FR-06.3** The system shall calculate and store a risk score (0–100) for each transaction.
-- **FR-06.4** Transactions exceeding risk thresholds shall be automatically flagged.
-- **FR-06.5** The system shall support filtering transactions by date range, flagged status, and amount.
+- **FR-06.4** The system shall compute and maintain a composite risk band (LOW / MEDIUM / HIGH / CRITICAL) for each customer, updated automatically after each transaction or alert.
+- **FR-06.5** Transactions exceeding risk thresholds shall be automatically flagged.
+- **FR-06.6** The system shall support filtering transactions by date range, flagged status, and amount.
 
 ### FR-07: AML Rules Engine
-- **FR-07.1** The system shall implement the following detection rules:
+- **FR-07.1** The system shall implement the following nine detection rules:
   - Large Transaction (single amount > $10,000)
   - Structuring / Smurfing (multiple amounts just below threshold)
   - High Frequency (excessive transactions within 24 hours)
@@ -63,8 +64,8 @@
 - **FR-07.4** Each triggered rule shall produce a weighted risk score contribution.
 
 ### FR-08: Alert Management
-- **FR-08.1** The system shall automatically generate alerts when AML rules are triggered.
-- **FR-08.2** Each alert shall be assigned a unique alert number, severity (LOW/MEDIUM/HIGH/CRITICAL), status (OPEN/INVESTIGATING/FALSE_POSITIVE/ESCALATED/CLOSED), and rule context.
+- **FR-08.1** The system shall automatically generate alerts whenever a rule is triggered, a customer risk threshold is exceeded, or a sanctions hit is detected.
+- **FR-08.2** Each alert shall be assigned a unique alert number, severity (LOW / MEDIUM / HIGH / CRITICAL), status (OPEN / INVESTIGATING / ESCALATED / FALSE_POSITIVE / CLOSED), and rule context.
 - **FR-08.3** Analysts shall be able to update alert status and add investigation notes.
 - **FR-08.4** Alerts shall be filterable by severity, status, and date.
 - **FR-08.5** Analysts shall be able to create a case directly from an alert.
@@ -77,11 +78,12 @@
 - **FR-09.5** Cases shall be filterable by status, priority, and assigned user.
 
 ### FR-10: Sanctions Screening
-- **FR-10.1** The system shall import and store the official OFAC SDN Advanced XML list into a local database.
-- **FR-10.2** The system shall provide a fuzzy name search against the SDN list using a composite scoring algorithm.
-- **FR-10.3** The scoring formula shall be: `Jaro-Winkler × 0.70 + Token Overlap × 0.20 + Prefix Bonus × 0.10`.
-- **FR-10.4** The system shall support filtering by entity type, country, and SDN program.
-- **FR-10.5** Results shall be classified as STRONG (≥0.85), POSSIBLE (≥0.70), or WEAK (≥0.60).
+- **FR-10.1** The system shall import and store the OFAC SDN Advanced XML list and the UN Consolidated Sanctions List into a local database.
+- **FR-10.2** The system shall provide a fuzzy name search against both lists with tolerance for name variations and transliterations.
+- **FR-10.3** The composite scoring formula per alias shall be:
+  `Token Recall (per-token best Jaro-Winkler) × 0.60 + Full-string Jaro-Winkler × 0.25 + Token Jaccard Overlap × 0.15`
+- **FR-10.4** The system shall support filtering results by entity type, country, and SDN program.
+- **FR-10.5** Results shall be classified as EXACT (100), STRONG (≥85), POSSIBLE (≥70), or WEAK (<70).
 - **FR-10.6** Users shall be able to adjust the minimum score threshold and maximum result count.
 
 ### FR-11: Dashboard & Analytics
@@ -92,55 +94,49 @@
 - **FR-11.5** The system shall display case distribution by status (pie chart).
 - **FR-11.6** The system shall display the top AML rules by number of triggered alerts.
 
-### FR-12: Audit Logging
-- **FR-12.1** The system shall log all create, update, and delete operations across all modules.
-- **FR-12.2** Each audit entry shall record the user, action type, affected entity, timestamp, IP address, and before/after JSON snapshots.
-- **FR-12.3** Admin users shall be able to view and filter the full audit log.
+### FR-12: ML Anomaly Detection
+- **FR-12.1** The system shall provide an unsupervised anomaly detector based on the Isolation Forest algorithm to identify unusual transaction patterns not covered by predefined rules.
+- **FR-12.2** The anomaly detector shall maintain a separate model per customer, trained on that customer's own transaction history.
+- **FR-12.3** The detector shall evaluate each transaction on seven features: log(amount), hour of day, day of week, is_international, is_round_amount, transaction type, and channel.
+- **FR-12.4** Each transaction shall receive an anomaly score (0–100) and an is_anomaly flag.
+- **FR-12.5** Anomalous transactions shall be flagged independently of rule-based alerts.
+
+### FR-13: Audit Logging
+- **FR-13.1** The system shall maintain an immutable audit log recording all create, update, and delete operations across all modules.
+- **FR-13.2** Each audit entry shall record the user identity, action type, affected entity, timestamp, IP address, and before/after JSON snapshots.
+- **FR-13.3** Admin users shall be able to view and filter the full audit log.
 
 ---
 
 ## 2. Non-Functional Requirements
 
 ### NFR-01: Performance
-- **NFR-01.1** API endpoints shall respond within 500ms for standard CRUD operations under normal load.
-- **NFR-01.2** The sanctions screening search shall return results within 3 seconds for any query against the full SDN list.
-- **NFR-01.3** The OFAC SDN XML import shall process the 2.6-million-line file using streaming (iterparse) to avoid memory exhaustion.
-- **NFR-01.4** The database shall use WAL (Write-Ahead Logging) mode to support concurrent reads and writes without locking.
+- **NFR-01.1** API endpoints shall respond within 500 ms for all main operations under normal load.
+- **NFR-01.2** The sanctions screening search shall return results within 3 seconds for any query against the full OFAC SDN list.
 
 ### NFR-02: Security
 - **NFR-02.1** All passwords shall be hashed using bcrypt with a cost factor of 12.
 - **NFR-02.2** JWT tokens shall expire after 8 hours.
-- **NFR-02.3** All protected API routes shall require a valid JWT in the Authorization header.
-- **NFR-02.4** Role-based access shall be enforced server-side on every request.
-- **NFR-02.5** The system shall not expose password hashes or internal stack traces in API responses.
-- **NFR-02.6** Email verification codes shall be single-use and expire after 10 minutes.
+- **NFR-02.3** The system shall comply with OWASP Top 10 mitigations: all database queries shall use parameterised statements (no SQL injection), internal stack traces shall never be exposed in API responses, and role-based access shall be enforced server-side on every route.
 
-### NFR-03: Usability
-- **NFR-03.1** The UI shall support both dark mode and light mode, with the preference persisted across sessions.
-- **NFR-03.2** All data tables shall support search and filter operations without page reloads.
-- **NFR-03.3** The dashboard shall load all KPIs and charts in a single API call.
-- **NFR-03.4** Error messages shall be human-readable and displayed inline in the UI.
+### NFR-03: Maintainability
+- **NFR-03.1** The backend shall maintain a strict separation of layers: routers, services, models, and schemas shall reside in independent modules with no cross-layer imports.
 
-### NFR-04: Reliability
-- **NFR-04.1** The system shall not lose data on application restart (SQLite persistence).
-- **NFR-04.2** If SMTP email delivery fails, the system shall fall back to printing the verification code to the server console without crashing.
-- **NFR-04.3** Failed AML rule evaluation shall not block transaction creation.
+### NFR-04: Testability
+- **NFR-04.1** Unit test coverage shall reach at least 70% on domain logic, covering the services layer and the AML rules engine.
 
-### NFR-05: Maintainability
-- **NFR-05.1** AML rule thresholds shall be configurable via the UI without code changes.
-- **NFR-05.2** Each module shall be separated into its own router and service layer.
-- **NFR-05.3** All database models shall use SQLAlchemy ORM with typed columns.
-- **NFR-05.4** API request/response schemas shall be validated using Pydantic v2.
+### NFR-05: Portability
+- **NFR-05.1** The system shall run without code changes on Windows, macOS, and Linux.
+- **NFR-05.2** The backend shall require Python 3.13+ and the frontend shall require Node.js 18+.
 
-### NFR-06: Scalability
-- **NFR-06.1** The backend architecture shall be stateless to allow horizontal scaling.
-- **NFR-06.2** The sanctions screener shall use phonetic pre-filtering (Soundex) to limit the candidate pool before applying expensive string metrics.
-- **NFR-06.3** The SDN import shall batch-insert records in groups of 500 to avoid memory spikes.
+### NFR-06: Usability
+- **NFR-06.1** The interface shall support both dark mode and light mode, with the preference persisted across sessions.
+- **NFR-06.2** All error messages shall be human-readable and displayed inline in the UI.
 
-### NFR-07: Compatibility
-- **NFR-07.1** The backend shall support Python 3.13+.
-- **NFR-07.2** The frontend shall support modern browsers (Chrome, Firefox, Safari, Edge).
-- **NFR-07.3** The system shall run on macOS, Linux, and Windows.
+### NFR-07: Reliability
+- **NFR-07.1** The system shall not lose data on application restart (SQLite file persistence).
+- **NFR-07.2** If SMTP email delivery fails, the system shall fall back to printing the verification code to the server console without crashing.
+- **NFR-07.3** A failed AML rule evaluation shall not block transaction creation.
 
 ---
 
@@ -178,11 +174,13 @@
 | pydantic-settings | 2.6.1 | Environment config |
 | python-jose[cryptography] | 3.3.0 | JWT encoding/decoding |
 | passlib[bcrypt] | 1.7.4 | Password hashing |
-| jellyfish | 1.1.0 | Jaro-Winkler and Soundex |
+| jellyfish | 1.1.0 | Jaro-Winkler fuzzy matching |
 | lxml | 5.3.0 | XML streaming parser |
 | dnspython | 2.7.0 | Email domain MX validation |
 | python-dateutil | 2.9.0 | Date parsing utilities |
 | bcrypt | 4.2.1 | bcrypt backend |
+| scikit-learn | latest | Isolation Forest, Gradient Boosting |
+| numpy | latest | Numerical feature processing |
 
 ### SR-04: Frontend Dependencies
 
@@ -199,8 +197,9 @@
 
 | Service | Required | Purpose |
 |---------|----------|---------|
-| Brevo (or any SMTP) | Optional | Sending email verification codes |
-| OFAC SDN XML file | Required for sanctions | Local file, obtained from `sanctionslistservice.ofac.treas.gov` |
+| Brevo (or any SMTP provider) | Optional | Sending email verification codes (falls back to console if not configured) |
+| OFAC SDN Advanced XML | Required for sanctions | Local file, obtained from `sanctionslistservice.ofac.treas.gov` |
+| UN Consolidated List XML | Optional | Additional sanctions coverage |
 
 ### SR-06: Network Requirements
 
