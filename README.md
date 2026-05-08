@@ -1,7 +1,5 @@
 # AML Transaction Monitoring System
 
-> Anti-Money Laundering (AML) platform built as a university capstone project, inspired by real-world systems such as NICE Actimize, Oracle FCCM, and the OFAC Sanctions Search Tool.
-
 ---
 
 ## Table of Contents
@@ -157,6 +155,7 @@ Filter by min_score → Sort by score desc → Return Results
 | OFAC SDN | sdn_advanced.xml (official OFAC) | ~18,000+ |
 | UN SC List | consolidatedLegacyByNAME.xml (UN Security Council) | ~1,000+ |
 ---
+
 ## ML Models
 ### Anomaly Detector (`ml/anomaly_detector.py`)
 - **Algorithm:** Isolation Forest (unsupervised)
@@ -171,7 +170,8 @@ Filter by min_score → Sort by score desc → Return Results
 ### Feature Engineering (`ml/feature_engineering.py`)
 Centralised pipeline extracting features per customer across 6 groups: amount statistics, velocity windows, temporal patterns, geographic risk, alert history, and customer profile.
 ### Model Evaluator (`ml/model_evaluator.py`)
-Evaluation suite with precision/recall/F1/ROC-AUC, confusion matrix, threshold analysis, K-fold cross-validation, and side-by-side model comparison. Recall is weighted as the most important metric for AML.
+Evaluation suite with precision/recall/F1/ROC-AUC,confusion matrix, threshold analysis, K-fold cross-validation, and side-by-side model comparison. Recall is weighted as the most important metric for AML.
+
 ---
 ## Quick Start
 ### Prerequisites
