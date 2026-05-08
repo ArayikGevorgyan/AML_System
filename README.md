@@ -62,7 +62,7 @@ This system simulates a real-world AML transaction monitoring platform used by f
 | Fuzzy Matching | jellyfish (Jaro-Winkler), SQL ILIKE substring pre-filter |
 | XML Parsing | lxml iterparse (streaming, memory-efficient) |
 | ML / Statistics | scikit-learn, numpy (Isolation Forest, Gradient Boosting) |
-| Email | SMTP via Brevo (or dev fallback to terminal) |
+| Email | SMTP via smtplib (configurable in .env; falls back to console if not configured) |
 
 ---
 
@@ -93,9 +93,8 @@ This system simulates a real-world AML transaction monitoring platform used by f
 ```
 
 ---
-
+---
 ## Modules
-
 | Module | Description |
 |--------|-------------|
 | **Authentication** | JWT login/logout, email verification on registration, 3 roles |
@@ -111,14 +110,10 @@ This system simulates a real-world AML transaction monitoring platform used by f
 | **ML Models** | Isolation Forest anomaly detection + Gradient Boosting SAR prediction |
 | **Analysis** | Transaction trends, risk distribution, sanctions statistics |
 | **Dashboard** | KPI cards, trend charts, alert distribution, case statistics |
-| **Audit Logs** | Complete immutable audit trail with before/after JSON snapshots |
-
+| **Audit Logs** | Complete audit trail with before/after JSON snapshots |
 ---
-
 ## AML Detection Rules
-
 All rules are based on official regulatory guidance from the **Bank Secrecy Act (BSA)**, **FATF Recommendations**, and **FinCEN typologies**.
-
 | # | Rule | Regulatory Basis | Description |
 |---|------|-----------------|-------------|
 | 1 | **Large Transaction** | BSA / 31 USC §5313 | Single transaction exceeds $10,000 reporting threshold |
@@ -130,11 +125,8 @@ All rules are based on official regulatory guidance from the **Bank Secrecy Act 
 | 7 | **Round Amount** | FATF Guidance | Suspiciously round transaction amounts (e.g. $5,000.00) |
 | 8 | **PEP Transaction** | FATF Rec. 12 | Transaction involving a Politically Exposed Person |
 | 9 | **Micro-Transaction** | FinCEN Guidance | Repeated small amounts at high frequency (account testing indicator) |
-
 ---
-
 ## Sanctions Screening Algorithm
-
 The sanctions screener uses a multi-stage pipeline to search the OFAC SDN Advanced XML and UN Consolidated List. Results are displayed one row per alias — matching OFAC's official display model.
 
 ```
@@ -158,75 +150,53 @@ Exact token subset → Score 100 (matches OFAC "Min Score = 100" rule)
     ▼
 Filter by min_score → Sort by score desc → Return Results
 ```
-
 **Match strength:** EXACT (100) | STRONG (≥85) | POSSIBLE (≥70) | WEAK (<70)
-
 **Supported lists:**
-
 | List | Source | Entries |
 |------|--------|---------|
 | OFAC SDN | sdn_advanced.xml (official OFAC) | ~18,000+ |
 | UN SC List | consolidatedLegacyByNAME.xml (UN Security Council) | ~1,000+ |
-
 ---
-
 ## ML Models
-
 ### Anomaly Detector (`ml/anomaly_detector.py`)
 - **Algorithm:** Isolation Forest (unsupervised)
 - **Purpose:** Detects statistically unusual transactions for a specific customer based on their own historical behaviour — catches novel fraud patterns that no rule covers
 - **Features:** log(amount), hour of day, day of week, is_international, is_round_amount, transaction type, channel
 - **Output:** anomaly_score (0–100), is_anomaly (bool), reason
-
 ### Customer Risk Predictor (`ml/risk_model.py`)
-- **Algorithm:** Gradient Boosting Classifier (sklearn)
+- **Algorithm:** Gradient Boosting Classifier (sklearn GradientBoostingClassifier with StandardScaler pipeline)
 - **Purpose:** Predicts probability that a customer will generate a SAR in the next 90 days
 - **Features:** 14 features including transaction velocity, flag ratio, alert severity score, PEP/sanctions status, country risk, account age
 - **Output:** sar_probability (0–1), risk_band, top_factors
-
 ### Feature Engineering (`ml/feature_engineering.py`)
-Centralised pipeline extracting 30+ features per customer across 5 groups: amount statistics, velocity windows, temporal patterns, geographic risk, and alert history.
-
+Centralised pipeline extracting features per customer across 6 groups: amount statistics, velocity windows, temporal patterns, geographic risk, alert history, and customer profile.
 ### Model Evaluator (`ml/model_evaluator.py`)
 Evaluation suite with precision/recall/F1/ROC-AUC, confusion matrix, threshold analysis, K-fold cross-validation, and side-by-side model comparison. Recall is weighted as the most important metric for AML.
-
 ---
-
 ## Quick Start
-
 ### Prerequisites
-
 - Python 3.13+
 - Node.js 18+
 - OFAC SDN Advanced XML file (`sdn_advanced.xml`)
 - UN Consolidated List XML file (`consolidatedLegacyByNAME.xml`) *(optional)*
-
 ### 1. Backend Setup
-
 ```bash
 cd backend
-
 # Create and activate virtual environment
 python3 -m venv venv
 source venv/bin/activate        # macOS/Linux
 # venv\Scripts\activate         # Windows
-
 # Install dependencies
 pip install -r requirements.txt
-
 # Seed the database (users, rules, customers, transactions)
 python scripts/seed_data.py
-
 # Import OFAC SDN sanctions list
 python scripts/import_sanctions.py
-
 # Import UN Consolidated List (optional)
 python scripts/import_un_sanctions.py
-
 # Configure email (optional — codes print to terminal if not configured)
 cp .env.example .env
 # Edit .env with your SMTP credentials
-
 # Start the API server
 uvicorn main:app --reload --port 8000
 ```
@@ -306,67 +276,96 @@ AML/
 │   ├── requirements.txt
 │   ├── .env.example
 │   ├── models/                    # SQLAlchemy ORM models
-│   │   ├── user.py
-│   │   ├── customer.py
 │   │   ├── account.py
-│   │   ├── transaction.py
-│   │   ├── rule.py
 │   │   ├── alert.py
+│   │   ├── audit_log.py
+│   │   ├── blacklist.py
 │   │   ├── case.py
+│   │   ├── customer.py
+│   │   ├── rule.py
 │   │   ├── sanctions.py
-│   │   ├── blacklist.py
-│   │   └── audit_log.py
+│   │   ├── session.py
+│   │   ├── transaction.py
+│   │   └── user.py
 │   ├── routers/                   # FastAPI route handlers
-│   │   ├── auth.py
-│   │   ├── customers.py
-│   │   ├── transactions.py
-│   │   ├── rules.py
 │   │   ├── alerts.py
-│   │   ├── cases.py
-│   │   ├── sanctions.py
+│   │   ├── audit.py
+│   │   ├── auth.py
 │   │   ├── blacklist.py
+│   │   ├── cases.py
+│   │   ├── customers.py
 │   │   ├── dashboard.py
+│   │   ├── demo.py
+│   │   ├── escalation.py
+│   │   ├── export_router.py
 │   │   ├── reporting.py
 │   │   ├── risk_scoring.py
-│   │   └── audit.py
+│   │   ├── rules.py
+│   │   ├── sanctions.py
+│   │   ├── sessions.py
+│   │   └── transactions.py
 │   ├── services/                  # Business logic
-│   │   ├── rules_engine.py        # AML detection engine (9 rules)
-│   │   ├── sanctions_screener.py  # Jaro-Winkler fuzzy screener
+│   │   ├── ai_summary_service.py
 │   │   ├── alert_service.py
-│   │   ├── case_service.py
-│   │   ├── transaction_service.py
-│   │   ├── customer_service.py
-│   │   ├── risk_scoring_service.py
-│   │   ├── blacklist_service.py
-│   │   ├── dashboard_service.py
-│   │   ├── auth_service.py
 │   │   ├── audit_service.py
+│   │   ├── auth_service.py
+│   │   ├── blacklist_service.py
+│   │   ├── case_service.py
+│   │   ├── customer_service.py
+│   │   ├── dashboard_service.py
+│   │   ├── email_service.py
 │   │   ├── escalation_service.py
-│   │   ├── reporting_service.py
 │   │   ├── predictive_risk_service.py
-│   │   └── email_service.py
+│   │   ├── reporting_service.py
+│   │   ├── risk_scoring_service.py  # Composite risk score (profile + behaviour + alerts)
+│   │   ├── rules_engine.py          # AML detection engine (9 rules)
+│   │   ├── sanctions_screener.py    # Jaro-Winkler fuzzy screener
+│   │   ├── transaction_service.py
+│   │   └── verification_service.py
 │   ├── ml/                        # Machine learning models
 │   │   ├── anomaly_detector.py    # Isolation Forest per-customer
+│   │   ├── data_preprocessor.py
+│   │   ├── feature_engineering.py # Centralised feature pipeline (6 groups)
+│   │   ├── model_evaluator.py     # Metrics, threshold analysis, K-fold CV
+│   │   ├── network_anomaly_detector.py
+│   │   ├── pattern_recognition.py
 │   │   ├── risk_model.py          # Gradient Boosting SAR predictor
-│   │   ├── feature_engineering.py # Centralised feature pipeline
-│   │   ├── model_evaluator.py     # Metrics, threshold analysis
+│   │   ├── sar_classifier.py
 │   │   └── train.py               # Training script
 │   ├── analysis/                  # Data analysis modules
-│   │   ├── transaction_analysis.py
+│   │   ├── alert_analysis.py
+│   │   ├── behavioral_analysis.py
+│   │   ├── compliance_metrics.py
+│   │   ├── customer_risk_analysis.py
+│   │   ├── network_analysis.py
 │   │   ├── risk_distribution.py
-│   │   └── sanctions_stats.py
-│   ├── tests/                     # Unit tests (pytest)
-│   │   ├── test_sanctions_screener.py
+│   │   ├── sanctions_stats.py
+│   │   └── transaction_analysis.py
+│   ├── tests/                     # Unit tests (pytest — 363 tests across 17 modules)
+│   │   ├── test_alert_service.py
+│   │   ├── test_audit_service.py
+│   │   ├── test_auth_service.py
+│   │   ├── test_blacklist_service.py
+│   │   ├── test_case_service.py
+│   │   ├── test_cases_router.py
+│   │   ├── test_customer_service.py
+│   │   ├── test_customers_router.py
+│   │   ├── test_dashboard_service.py
+│   │   ├── test_escalation_service.py
+│   │   ├── test_predictive_risk_service.py
+│   │   ├── test_reporting_service.py
 │   │   ├── test_risk_scoring.py
 │   │   ├── test_rules_engine.py
-│   │   ├── test_auth_service.py
-│   │   ├── test_alert_service.py
+│   │   ├── test_sanctions_screener.py
 │   │   ├── test_transaction_service.py
-│   │   └── test_blacklist_service.py
+│   │   └── test_transactions_router.py
 │   ├── core/
-│   │   ├── security.py            # JWT and bcrypt
+│   │   ├── cache.py
 │   │   ├── dependencies.py        # FastAPI dependencies / RBAC
-│   │   └── enums.py
+│   │   ├── enums.py
+│   │   ├── exceptions.py
+│   │   ├── rate_limiter.py
+│   │   └── security.py            # JWT and bcrypt
 │   └── scripts/
 │       ├── seed_data.py           # Demo data seeder
 │       ├── import_sanctions.py    # OFAC XML importer
@@ -390,6 +389,7 @@ AML/
 │       │   ├── Sidebar.js
 │       │   └── Topbar.js
 │       └── pages/
+│           ├── Landing.js         # Public home / entry point
 │           ├── Login.js
 │           ├── Register.js
 │           ├── Dashboard.js
@@ -399,9 +399,19 @@ AML/
 │           ├── Cases.js
 │           ├── Sanctions.js       # Searchable Type/Program/Country dropdowns
 │           ├── Rules.js
-│           └── Audit.js
+│           ├── Blacklist.js
+│           ├── Audit.js
+│           ├── Profile.js
+│           ├── Sessions.js
+│           └── GeoHeatmap.js
 │
 └── docs/
     ├── REQUIREMENTS.md
-    └── USER_STORIES.md
+    ├── USER_STORIES.md
+    ├── 1-planning/                # SRS, user stories, use cases, project charter
+    ├── 2-design/                  # Architecture, database schema, API spec, technical design
+    ├── 4-testing/                 # Test plan, test cases, test summary report
+    ├── 5-deployment/              # Deployment guide, user manual, release notes
+    ├── 6-management/              # Product backlog, Gantt chart
+    └── pdf/                       # PDF exports of all documents
 ```
