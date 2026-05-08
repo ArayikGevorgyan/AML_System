@@ -178,7 +178,7 @@ Evaluation suite with precision/recall/F1/ROC-AUC,confusion matrix, threshold an
 - Python 3.13+
 - Node.js 18+
 - OFAC SDN Advanced XML file (`sdn_advanced.xml`)
-- UN Consolidated List XML file (`consolidatedLegacyByNAME.xml`) *(optional)*
+- UN Consolidated List XML file (`consolidatedLegacyByNAME.xml`)
 ### 1. Backend Setup
 ```bash
 cd backend
