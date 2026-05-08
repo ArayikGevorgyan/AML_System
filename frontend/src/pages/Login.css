@@ -24,62 +24,113 @@ body[data-theme="light"] .login-page {
 /* ── Login Card ── */
 .login-card {
   position: relative;
+  display: flex;
+  flex-direction: row;
   background: #0E1119;
   border: 1px solid rgba(255,255,255,0.09);
-  border-top: 3px solid #F0A500;
   border-radius: 12px;
-  padding: 36px 40px;
   width: 100%;
-  max-width: 400px;
+  max-width: 820px;
+  overflow: hidden;
   box-shadow: 0 24px 64px rgba(0,0,0,0.7);
 }
 body[data-theme="light"] .login-card {
   background: #FFFFFF;
   border-color: rgba(0,0,0,0.1);
-  border-top-color: #D97706;
   box-shadow: 0 12px 40px rgba(0,0,0,0.1);
 }
 
-/* ── Logo / Brand ── */
-.login-logo {
+/* ── Left branding panel ── */
+.login-left {
+  flex: 0 0 300px;
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, #F0A500 0%, #C97B00 100%);
+  padding: 48px 32px;
+  text-align: center;
   gap: 12px;
-  margin-bottom: 28px;
 }
-.login-logo-icon {
-  width: 44px;
-  height: 44px;
-  background: var(--gradient-main);
-  border-radius: 8px;
+
+.login-icon-wrap {
+  width: 120px;
+  height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: rgba(255,255,255,0.15);
+  border-radius: 50%;
+  margin-bottom: 8px;
+  box-shadow: 0 0 40px rgba(255,255,255,0.2), 0 0 80px rgba(240,165,0,0.3);
   color: #fff;
+}
+
+.login-left .login-brand {
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.4px;
+  margin: 0;
+}
+
+.login-left .login-subtitle {
+  font-size: 10.5px;
+  color: rgba(255,255,255,0.75);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.login-left-desc {
+  font-size: 12.5px;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.6;
+  margin-top: 4px;
+}
+
+/* ── Vertical divider ── */
+.login-vdivider {
+  width: 1px;
+  background: rgba(255,255,255,0.09);
+  align-self: stretch;
   flex-shrink: 0;
 }
-.login-brand {
-  font-size: 18px;
-  font-weight: 800;
-  color: #E2E8F0;
-  letter-spacing: -0.4px;
-}
-.login-subtitle {
-  font-size: 10px;
-  color: rgba(240,165,0,0.6);
-  margin-top: 2px;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
+body[data-theme="light"] .login-vdivider {
+  background: rgba(0,0,0,0.08);
 }
 
-body[data-theme="light"] .login-brand { color: #0F172A; }
-
-.login-divider {
-  height: 1px;
-  background: rgba(255,255,255,0.07);
-  margin-bottom: 24px;
+/* ── Right form panel ── */
+.login-right {
+  flex: 1;
+  padding: 36px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
-body[data-theme="light"] .login-divider { background: rgba(0,0,0,0.08); }
+
+/* ── Responsive: stack on small screens ── */
+@media (max-width: 640px) {
+  .login-card {
+    flex-direction: column;
+  }
+  .login-left {
+    flex: none;
+    padding: 32px 24px;
+  }
+  .login-icon-wrap {
+    width: 80px;
+    height: 80px;
+  }
+  .login-vdivider {
+    width: 100%;
+    height: 1px;
+    align-self: auto;
+  }
+  .login-right {
+    padding: 28px 24px;
+  }
+}
 
 .login-title {
   font-size: 17px;

@@ -97,8 +97,8 @@ export default function Dashboard() {
             <LineChart data={txnChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#2D3748" />
               <XAxis dataKey="date" tick={{ fill: '#64748B', fontSize: 11 }} />
-              <YAxis tick={{ fill: '#64748B', fontSize: 11 }} />
-              <Tooltip contentStyle={{ background: '#1A1D27', border: '1px solid #2D3748', borderRadius: 8, color: '#F1F5F9' }} itemStyle={{ color: '#F1F5F9' }} labelStyle={{ color: '#F1F5F9' }} />
+              <YAxis tick={{ fill: '#64748B', fontSize: 11 }} tickFormatter={v => v >= 1000 ? `$${(v/1000).toFixed(0)}K` : `$${v}`} width={55} tickCount={12} />
+              <Tooltip formatter={v => [`$${Number(v).toLocaleString()}`, 'Volume']} contentStyle={{ background: '#1A1D27', border: '1px solid #2D3748', borderRadius: 8, color: '#F1F5F9' }} itemStyle={{ color: '#F1F5F9' }} labelStyle={{ color: '#F1F5F9' }} />
               <Line type="monotone" dataKey="amount" stroke="#3B82F6" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
@@ -112,7 +112,7 @@ export default function Dashboard() {
             <BarChart data={alertChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#2D3748" />
               <XAxis dataKey="date" tick={{ fill: '#64748B', fontSize: 11 }} />
-              <YAxis tick={{ fill: '#64748B', fontSize: 11 }} />
+              <YAxis tick={{ fill: '#64748B', fontSize: 11 }} tickCount={12} />
               <Tooltip contentStyle={{ background: '#1A1D27', border: '1px solid #2D3748', borderRadius: 8, color: '#F1F5F9' }} itemStyle={{ color: '#F1F5F9' }} labelStyle={{ color: '#F1F5F9' }} />
               <Bar dataKey="alerts" fill="#EF4444" radius={[4, 4, 0, 0]} />
             </BarChart>

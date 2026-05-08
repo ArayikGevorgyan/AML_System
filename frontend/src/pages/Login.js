@@ -31,64 +31,73 @@ export default function Login() {
       </button>
 
       <div className="login-card">
-        <div className="login-logo">
-          <div className="login-logo-icon"><MdSecurity size={32} /></div>
-          <div>
-            <h1 className="login-brand">AML Monitor</h1>
-            <p className="login-subtitle">Transaction Monitoring System</p>
+
+        {/* LEFT — branding panel */}
+        <div className="login-left">
+          <div className="login-icon-wrap">
+            <MdSecurity size={80} />
+          </div>
+          <h1 className="login-brand">AML Monitor</h1>
+          <p className="login-subtitle">Transaction Monitoring System</p>
+          <p className="login-left-desc">
+            Secure, real-time transaction monitoring for compliance professionals.
+          </p>
+        </div>
+
+        {/* DIVIDER */}
+        <div className="login-vdivider" />
+
+        {/* RIGHT — form panel */}
+        <div className="login-right">
+          <h2 className="login-title">Secure Login</h2>
+          <p className="login-desc">Sign in with your compliance credentials</p>
+
+          {error && <div className="login-error">⚠ {error}</div>}
+
+          <form onSubmit={handleSubmit} className="login-form">
+            <div className="login-field">
+              <MdPerson className="login-field-icon" size={16} />
+              <input
+                className="login-input"
+                type="text"
+                placeholder="Username"
+                value={form.username}
+                onChange={e => setForm({ ...form, username: e.target.value })}
+                required
+              />
+            </div>
+            <div className="login-field">
+              <MdLock className="login-field-icon" size={16} />
+              <input
+                className="login-input"
+                type="password"
+                placeholder="Password"
+                value={form.password}
+                onChange={e => setForm({ ...form, password: e.target.value })}
+                required
+              />
+            </div>
+            <button className="login-btn" type="submit" disabled={loading}>
+              {loading ? 'Authenticating...' : 'Sign In'}
+            </button>
+          </form>
+
+          <div className="login-credentials">
+            <p className="login-cred-title">Demo Accounts</p>
+            <div className="login-cred-grid">
+              <div onClick={() => setForm({ username: 'admin', password: 'Admin@123' })}>
+                <span>admin</span><span>Admin@123</span><span className="cred-role">Admin</span>
+              </div>
+              <div onClick={() => setForm({ username: 'ArayikAnalyst', password: 'Analyst@123' })}>
+                <span>ArayikAnalyst</span><span>Analyst@123</span><span className="cred-role">Analyst</span>
+              </div>
+              <div onClick={() => setForm({ username: 'ArayikSupervisor', password: 'Super@123' })}>
+                <span>ArayikSupervisor</span><span>Super@123</span><span className="cred-role">Supervisor</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="login-divider" />
-
-        <h2 className="login-title">Secure Login</h2>
-        <p className="login-desc">Sign in with your compliance credentials</p>
-
-        {error && <div className="login-error">⚠ {error}</div>}
-
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className="login-field">
-            <MdPerson className="login-field-icon" size={16} />
-            <input
-              className="login-input"
-              type="text"
-              placeholder="Username"
-              value={form.username}
-              onChange={e => setForm({ ...form, username: e.target.value })}
-              required
-            />
-          </div>
-          <div className="login-field">
-            <MdLock className="login-field-icon" size={16} />
-            <input
-              className="login-input"
-              type="password"
-              placeholder="Password"
-              value={form.password}
-              onChange={e => setForm({ ...form, password: e.target.value })}
-              required
-            />
-          </div>
-          <button className="login-btn" type="submit" disabled={loading}>
-            {loading ? 'Authenticating...' : 'Sign In'}
-          </button>
-        </form>
-
-
-        <div className="login-credentials">
-          <p className="login-cred-title">Demo Accounts</p>
-          <div className="login-cred-grid">
-            <div onClick={() => setForm({ username: 'admin', password: 'Admin@123' })}>
-              <span>admin</span><span>Admin@123</span><span className="cred-role">Admin</span>
-            </div>
-            <div onClick={() => setForm({ username: 'ArayikAnalyst', password: 'Analyst@123' })}>
-              <span>ArayikAnalyst</span><span>Analyst@123</span><span className="cred-role">Analyst</span>
-            </div>
-            <div onClick={() => setForm({ username: 'ArayikSupervisor', password: 'Super@123' })}>
-              <span>ArayikSupervisor</span><span>Super@123</span><span className="cred-role">Supervisor</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
